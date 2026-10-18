@@ -58,6 +58,7 @@ func run_all() -> bool:
 
 
 func _test(inst: TestCase, script: Script, method_data: Dictionary) -> bool:
+	inst.before_each()
 	inst.call(method_data.name)
 	var failed := inst._test_case_has_failed()
 	
