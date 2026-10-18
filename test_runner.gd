@@ -7,8 +7,8 @@ const GD_SUFFIX := ".gd"
 
 var scripts: Array[Script] = []
 
-var total_failed: int = 0
-var total_tested: int = 0
+var failures: int = 0
+var runs: int = 0
 
 func _init() -> void:
 	_scan_dir(TESTS_DIR)
@@ -47,13 +47,20 @@ func run_all() -> bool:
 		var inst := script.new() as TestCase
 		if inst == null:
 			continue
-		
+
+		var local_runs: int = 0
+		var local_failures: int = 0
+		print("Running %s" % get_script_classname(script))
 		for method_data: Dictionary in inst.get_test_methods():
-			total_tested += 1
+			local_runs += 1
 			if _test(inst, script, method_data):
 				has_failures = true
-				total_failed += 1
-	
+				local_failures += 1
+
+		runs += local_runs
+		failures += local_failures
+		print("Test run: %d, Failures: %d -- in %s" % [local_runs, local_failures, get_script_classname(script)])
+
 	return has_failures
 
 
@@ -61,13 +68,15 @@ func _test(inst: TestCase, script: Script, method_data: Dictionary) -> bool:
 	inst.before_each()
 	inst.call(method_data.name)
 	var failed := inst._test_case_has_failed()
-	
+
 	for message: String in inst._test_case_get_failures():
-		var classname: StringName = script.get_global_name()
-		if classname.is_empty():
-			classname = script.resource_path.get_file().get_basename().to_pascal_case()
-		
-		printerr("[%s.%s] %s" % [classname, method_data.name, message])
-	
+		printerr("[%s.%s] %s" % [get_script_classname(script), method_data.name, message])
+
 	inst._test_case_clean_itself()
 	return failed
+
+func get_script_classname(script: Script) -> StringName:
+	var classname: StringName = script.get_global_name()
+	if classname.is_empty():
+		classname = script.resource_path.get_file().get_basename().to_pascal_case()
+	return classname
