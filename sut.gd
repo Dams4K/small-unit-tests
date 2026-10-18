@@ -20,7 +20,7 @@ func _enter_tree() -> void:
 	var img := tex.get_image()
 	img.resize(int(16 * scale), int(16 * scale), Image.INTERPOLATE_LANCZOS)
 	run_tests_button.icon = ImageTexture.create_from_image(img)
-	run_tests_button.modulate = _get_editor_icon_color()
+	run_tests_button.modulate = EditorInterface.get_editor_theme().get_color("success_color", "Editor")
 
 	add_control_to_container(EditorPlugin.CONTAINER_TOOLBAR, run_tests_button)
 
