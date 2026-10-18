@@ -9,7 +9,7 @@ static func build(results: Array[TestRunner.TestResult], suite_name := "core") -
 
 	for r in results:
 		total_time += r.duration
-		cases += '\t\t<testcase classname="%s" name="%s" time="%.4f"' % [_esc(r.long_classname.trim_prefix("%s.%s" % [TestRunner.TESTS_DIR, suite_name])), _esc(r.name), r.duration]
+		cases += '\t\t<testcase classname="%s" name="%s" time="%.4f"' % [_esc(r.long_classname.trim_prefix("%s.%s." % [TestRunner.TESTS_DIR, suite_name])), _esc(r.name), r.duration]
 
 		if not r.failures.is_empty():
 			failures += 1
