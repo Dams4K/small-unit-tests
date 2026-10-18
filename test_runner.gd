@@ -1,7 +1,7 @@
 extends RefCounted
 class_name TestRunner
 
-const TESTS_DIR := "res://tests"
+const TESTS_DIR := "tests"
 const TEST_FILE_PREFIX := "test_"
 const GD_SUFFIX := ".gd"
 
@@ -12,7 +12,7 @@ var failures: int = 0
 var runs: int = 0
 
 func _init() -> void:
-	_scan_dir(TESTS_DIR)
+	_scan_dir("res://" + TESTS_DIR)
 
 func _scan_dir(path: String) -> void:
 	var dir = DirAccess.open(path)
@@ -71,11 +71,11 @@ func run_all() -> bool:
 
 func _test(inst: TestCase, script: Script, method_data: Dictionary) -> bool:
 	inst.before_each()
-	
+
 	var start := Time.get_ticks_usec()
-	
+
 	inst.call(method_data.name)
-	
+
 	var result := TestResult.new()
 	result.classname = get_script_classname(script)
 	result.long_classname = script.resource_path.trim_prefix("res://").trim_suffix(".gd").replace("/", ".")
@@ -84,7 +84,7 @@ func _test(inst: TestCase, script: Script, method_data: Dictionary) -> bool:
 	result.failures = inst._test_case_failures.duplicate()
 	result.no_assertion = inst._test_case_assertion_count == 0
 	results.append(result)
-	
+
 	var failed := inst._test_case_has_failed()
 	for message: String in inst._test_case_failures:
 		TestReport.report_fail("[%s.%s] %s" % [get_script_classname(script), method_data.name, message])

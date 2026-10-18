@@ -6,11 +6,11 @@ static func build(results: Array[TestRunner.TestResult], suite_name := "core") -
 	var errors := 0
 	var total_time := 0.0
 	var cases := ""
-	
+
 	for r in results:
 		total_time += r.duration
-		cases += '\t\t<testcase classname="%s" name="%s" time="%.4f"' % [_esc(r.long_classname), _esc(r.name), r.duration]
-		
+		cases += '\t\t<testcase classname="%s" name="%s" time="%.4f"' % [_esc(r.long_classname.trim_prefix("%s.%s" % [TestRunner.TESTS_DIR, suite_name])), _esc(r.name), r.duration]
+
 		if not r.failures.is_empty():
 			failures += 1
 			cases += ">\n"
@@ -23,7 +23,7 @@ static func build(results: Array[TestRunner.TestResult], suite_name := "core") -
 			cases += "\t\t</testcase>\n"
 		else:
 			cases += "/>\n"
-	
+
 	var xml := '<?xml version="1.0" encoding="UTF-8"?>\n'
 	xml += '<testsuites>\n'
 	xml += '\t<testsuite name="%s" tests="%d" failures="%d" errors="%d" skipped="0" time="%.4f">\n' % [
