@@ -13,6 +13,7 @@ var runs: int = 0
 
 func _init() -> void:
 	_scan_dir("res://" + TESTS_DIR)
+	SutTestReport.report("%d test files found.\n" % scripts.size())
 
 func _scan_dir(path: String) -> void:
 	var dir = DirAccess.open(path)
@@ -45,7 +46,8 @@ func _inherits_test_case(script: Script) -> bool:
 func run_all() -> bool:
 	var has_failures := false
 	for script: Script in scripts:
-		has_failures = has_failures or run_script(script)
+		var failed := run_script(script)
+		has_failures = has_failures or failed
 	
 	return has_failures
 
@@ -53,6 +55,7 @@ func run_script(script: Script) -> bool:
 	var inst := script.new() as TestCase
 	if inst == null:
 		push_error("Script '%s' do not inherits from TestCase" % script)
+		return false
 
 	var local_runs: int = 0
 	var local_failures: int = 0
@@ -70,7 +73,7 @@ func run_script(script: Script) -> bool:
 
 	runs += local_runs
 	failures += local_failures
-	SutTestReport.report_results(results)
+	SutTestReport.report_results(local_results)
 
 	return local_failures == 0
 
@@ -81,27 +84,13 @@ func _test(inst: TestCase, script: Script, method_data: Dictionary) -> SutTestRe
 	var start := Time.get_ticks_usec()
 
 	inst.call(method_data.name)
-
+	
 	var result := SutTestResult.new()
 	result.by = script
-	#result.classname = get_script_classname(script)
-	#result.long_classname = script.resource_path.trim_prefix("res://").trim_suffix(".gd").replace("/", ".")
 	result.name = method_data.name
-	result.duration_usec = (Time.get_ticks_usec() - start) / 1_000_000.0
+	result.duration_usec = Time.get_ticks_usec() - start
 	result.failures = inst._test_case_failures.duplicate()
 	result.no_assertion = inst._test_case_assertion_count == 0
-	#results.append(result)
-#
-	#var failed := inst._test_case_has_failed()
-	#for message: String in inst._test_case_failures:
-	#	SutTestReport.report_fail("[%s.%s] %s" % [get_script_classname(script), method_data.name, message])
 
 	inst._test_case_clean_itself()
 	return result
-
-
-#func get_script_classname(script: Script) -> StringName:
-#	var classname: StringName = script.get_global_name()
-#	if classname.is_empty():
-#		classname = script.resource_path.get_file().get_basename().to_pascal_case()
-#	return classname

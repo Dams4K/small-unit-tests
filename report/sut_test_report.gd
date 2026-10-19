@@ -31,7 +31,7 @@ static func report_results(results: Array[SutTestResult]) -> void:
 			total_failures += 1
 		classname = result.get_classname()
 	
-	total_time /= 1_000_000
+	total_time /= 1_000_000.0
 
 	var is_success = total_failures == 0
 

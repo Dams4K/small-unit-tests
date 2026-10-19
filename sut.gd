@@ -4,14 +4,19 @@ extends EditorPlugin
 var run_tests_button: Button
 var run_thread: Thread
 
+var executor := SutTestExecutor.new()
+
 func project_path(rel_path: String) -> String:
 	var base = get_script().resource_path.get_base_dir()
 	return base.path_join(rel_path)
 
+
 func _enter_tree() -> void:
+	executor.finished.connect(_on_executor_finished)
+	
 	run_tests_button = Button.new()
 	run_tests_button.tooltip_text = "Run all tests"
-	run_tests_button.pressed.connect(_run_tests_cli_threaded)
+	run_tests_button.pressed.connect(_run_all_tests)
 	run_tests_button.theme_type_variation = &"RunBarButton"
 
 	add_control_to_container(EditorPlugin.CONTAINER_TOOLBAR, run_tests_button)
@@ -20,57 +25,22 @@ func _enter_tree() -> void:
 
 func _exit_tree() -> void:
 	remove_control_from_container(EditorPlugin.CONTAINER_TOOLBAR, run_tests_button)
-	if run_thread != null and run_thread.is_started():
-		run_thread.wait_to_finish()
+	executor.shutdown()
 
 
-func _run_tests_cli_threaded() -> void:
-	if run_thread != null and run_thread.is_started():
+func _run_all_tests() -> void:
+	if executor.is_running():
 		return
 	
 	run_tests_button.disabled = true
 	var base = get_script().resource_path.get_base_dir()
 	var run_script_path := ProjectSettings.globalize_path(project_path("cli/run.gd"))
 	
-	run_thread = Thread.new()
-	var err = run_thread.start(_run_tests_cli.bind(run_script_path))
+	executor.execute(run_script_path)
 
-	if err != OK:
-		push_error("Failed to start test thread: %s" % err)
-		run_thread = null
-
-
-func _run_tests_cli(run_script_path: String) ->void:
-	var project_path := ProjectSettings.globalize_path("res://")
-	
-	var output: Array
-	var exit_code := OS.execute(
-		OS.get_executable_path(),
-		[
-			"--headless", "--path", project_path, "-s", run_script_path,
-			"--",
-			"--bbcode",
-			"--success_color=%s" % SutTestColor.success().to_html(false),
-			"--error_color=%s" % SutTestColor.error().to_html(false)
-		],
-		output,
-		true,
-		false
-	)
-
-	_on_tests_finished.call_deferred(exit_code, output)
-
-
-func _on_tests_finished(exit_code: int, output: Array) -> void:
-	if run_thread != null and run_thread.is_started():
-		run_thread.wait_to_finish()
-		run_thread = null
-
-	for line in output:
-		print_rich(line)
-
-	print("Tests finished with exit code: %d" % exit_code)
+func _on_executor_finished(exit_code: int) -> void:
 	run_tests_button.disabled = false
+	print("\nTests finished with exit code: %d." % exit_code)
 
 
 func _get_editor_icon_color() -> Color:
