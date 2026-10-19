@@ -7,9 +7,9 @@ static func build(results: Array[SutTestResult], suite_name := "core") -> String
 	var total_time := 0.0
 	var cases := ""
 
-	for r in results:
+	for r: SutTestResult in results:
 		total_time += r.get_duration_seconds()
-		cases += '\t\t<testcase classname="%s" name="%s" time="%.4f"' % [_esc(r.long_classname.trim_prefix("%s.%s." % [TestRunner.TESTS_DIR, suite_name])), _esc(r.name), r.duration]
+		cases += '\t\t<testcase classname="%s" name="%s" time="%.4f"' % [r.get_long_classname(), _esc(r.name), r.get_duration_seconds()]
 
 		if not r.failures.is_empty():
 			failures += 1

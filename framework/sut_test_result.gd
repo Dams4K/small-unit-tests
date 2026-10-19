@@ -19,3 +19,6 @@ func get_classname() -> String:
 	if classname.is_empty():
 		classname = by.resource_path.get_file().get_basename().to_pascal_case()
 	return classname
+
+func get_long_classname() -> String:
+	return by.resource_path.trim_suffix(".gd").trim_prefix(TestRunner.TESTS_DIR)
