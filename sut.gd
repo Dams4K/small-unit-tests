@@ -23,20 +23,22 @@ func _exit_tree() -> void:
 func _run_tests_cli_threaded() -> void:
 	if run_thread != null and run_thread.is_started():
 		return
-
+	
+	var base = get_script().resource_path.get_base_dir()
+	var run_script_path := ProjectSettings.globalize_path(base.path_join("cli/run.gd"))
+	
 	run_thread = Thread.new()
-	var err = run_thread.start(_run_tests_cli)
+	var err = run_thread.start(_run_tests_cli.bind(run_script_path))
 
 	if err != OK:
 		push_error("Failed to start test thread: %s" % err)
 		run_thread = null
 
 
-func _run_tests_cli() ->void:
+func _run_tests_cli(run_script_path: String) ->void:
 	var project_path := ProjectSettings.globalize_path("res://")
-	var run_script_path := ProjectSettings.globalize_path("res://addons/sut/cli/run.gd")
+	
 	var output: Array
-
 	var exit_code := OS.execute(
 		OS.get_executable_path(),
 		[
