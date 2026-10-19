@@ -32,24 +32,24 @@ static func report_results(results: Array[SutTestResult]) -> void:
 		classname = result.get_classname()
 	
 	total_time /= 1_000_000
-	if total_failures == 0:
-		SutTestReport.report("[color=%s]Tests run: %d[/color], Failures: %d, Time elapsed: %.3fs [color=%s]-- in %s[/color]" % [
-			SutTestOptions.get_singleton().success_color,
-			total_runs,
-			total_failures,
-			total_time,
-			SutTestOptions.get_singleton().dim_color,
-			classname
-		])
+
+	var is_success = total_failures == 0
+
+	var run_text = "Tests run: %d" % total_runs
+	var failure_text = "Failures: %d" % total_failures
+
+	if is_success:
+		run_text = "[color=%s]%s[/color]" % [SutTestOptions.get_singleton().success_color, run_text]
 	else:
-		SutTestReport.report("Tests run: %d, [color=%s]Failures: %d[/color], Time elapsed: %.3fs [color=%s]-- in %s[/color]" % [
-			total_runs,
-			SutTestOptions.get_singleton().error_color,
-			total_failures,
-			total_time,
-			SutTestOptions.get_singleton().dim_color,
-			classname
-		])
+		failure_text = "[color=%s]%s[/color]" % [SutTestOptions.get_singleton().error_color, failure_text]
+
+	SutTestReport.report("%s, %s, Time elapsed: %.3fs [color=%s]-- in %s[/color]" % [
+		run_text,
+		failure_text,
+		total_time,
+		SutTestOptions.get_singleton().dim_color,
+		classname
+	])
 
 
 static func report_result_if_failed(result: SutTestResult) -> bool:
@@ -58,5 +58,9 @@ static func report_result_if_failed(result: SutTestResult) -> bool:
 	
 	var failed = result.failed()
 	for message: String in result.failures:
-		SutTestReport.report_fail("[%s.%s] %s" % [result.get_classname(), result.name, message])
+		SutTestReport.report_fail("[%s.%s] %s" % [result.get_classname(), result.name, _escape(message)])
 	return failed
+
+
+static func _escape(text: String) -> String:
+	return text.replace("[", "[lb]")
