@@ -4,12 +4,10 @@ func _init() -> void:
 	var runner := TestRunner.new()
 	var failed := runner.run_all()
 	
-	TestReport.report("\n[b]Results:[/b]")
+	SutTestReport.report("\n[b]Results:[/b]")
 	
-	if runner.failures == 0:
-		TestReport.report("[color=%s]Tests run: %d, Failures: %d[/color]" % [SutTestOptions.get_singleton().success_color, runner.runs, runner.failures])
-	else:
-		TestReport.report("[color=%s]Tests run: %d, Failures: %d[/color]" % [SutTestOptions.get_singleton().error_color, runner.runs, runner.failures])
+	var report_func = SutTestReport.report_success if runner.failures == 0 else SutTestReport.report_fail
+	report_func.call("Tests run: %d, Failures: %d" % [runner.runs, runner.failures])
 	
 	_write_junit(runner)
 	quit(1 if failed else 0)

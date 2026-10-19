@@ -4,6 +4,7 @@ class_name SutTestOptions
 @export_storage var bbcode: bool = false
 @export_storage var success_color: String = "#6cc38a"
 @export_storage var error_color: String = "#e5747a"
+@export_storage var warning_error: String = "#e0c068"
 @export_storage var dim_color: String = "#8b8b8b"
 @export_storage var junit: String = ""
 

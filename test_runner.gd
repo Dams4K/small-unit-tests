@@ -51,7 +51,7 @@ func run_all() -> bool:
 
 		var local_runs: int = 0
 		var local_failures: int = 0
-		TestReport.report("[color=%s]Running %s[/color]" % [SutTestOptions.get_singleton().dim_color, script.resource_path])
+		SutTestReport.report("[color=%s]Running %s[/color]" % [SutTestOptions.get_singleton().dim_color, script.resource_path])
 		for method_data: Dictionary in inst.get_test_methods():
 			local_runs += 1
 			if _test(inst, script, method_data):
@@ -62,7 +62,7 @@ func run_all() -> bool:
 		failures += local_failures
 
 		if local_failures == 0:
-			TestReport.report("[color=%s]Tests run: %d[/color], Failures: %d [color=%s]-- in %s[/color]" % [
+			SutTestReport.report("[color=%s]Tests run: %d[/color], Failures: %d [color=%s]-- in %s[/color]" % [
 				SutTestOptions.get_singleton().success_color,
 				local_runs,
 				local_failures,
@@ -70,7 +70,7 @@ func run_all() -> bool:
 				get_script_classname(script)
 			])
 		else:
-			TestReport.report("Tests run: %d, [color=%s]Failures: %d[/color] [color=%s]-- in %s[/color]" % [
+			SutTestReport.report("Tests run: %d, [color=%s]Failures: %d[/color] [color=%s]-- in %s[/color]" % [
 				local_runs,
 				SutTestOptions.get_singleton().error_color,
 				local_failures,
@@ -99,7 +99,7 @@ func _test(inst: TestCase, script: Script, method_data: Dictionary) -> bool:
 
 	var failed := inst._test_case_has_failed()
 	for message: String in inst._test_case_failures:
-		TestReport.report_fail("[%s.%s] %s" % [get_script_classname(script), method_data.name, message])
+		SutTestReport.report_fail("[%s.%s] %s" % [get_script_classname(script), method_data.name, message])
 
 	inst._test_case_clean_itself()
 	return failed
