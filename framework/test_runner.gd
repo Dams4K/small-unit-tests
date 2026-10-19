@@ -7,7 +7,7 @@ const GD_SUFFIX := ".gd"
 
 var scripts: Array[Script] = []
 
-var results: Array[TestResult] = []
+var results: Array[SutTestResult] = []
 var failures: int = 0
 var runs: int = 0
 
@@ -45,77 +45,81 @@ func _inherits_test_case(script: Script) -> bool:
 func run_all() -> bool:
 	var has_failures := false
 	for script: Script in scripts:
-		var inst := script.new() as TestCase
-		if inst == null:
-			continue
-
-		var local_runs: int = 0
-		var local_failures: int = 0
-		SutTestReport.report("[color=%s]Running %s[/color]" % [SutTestOptions.get_singleton().dim_color, script.resource_path])
-		for method_data: Dictionary in inst.get_test_methods():
-			local_runs += 1
-			if _test(inst, script, method_data):
-				has_failures = true
-				local_failures += 1
-
-		runs += local_runs
-		failures += local_failures
-
-		if local_failures == 0:
-			SutTestReport.report("[color=%s]Tests run: %d[/color], Failures: %d [color=%s]-- in %s[/color]" % [
-				SutTestOptions.get_singleton().success_color,
-				local_runs,
-				local_failures,
-				SutTestOptions.get_singleton().dim_color,
-				get_script_classname(script)
-			])
-		else:
-			SutTestReport.report("Tests run: %d, [color=%s]Failures: %d[/color] [color=%s]-- in %s[/color]" % [
-				local_runs,
-				SutTestOptions.get_singleton().error_color,
-				local_failures,
-				SutTestOptions.get_singleton().dim_color,
-				get_script_classname(script)
-			])
-
+		has_failures = has_failures or run_script(script)
+	
 	return has_failures
 
+func run_script(script: Script) -> bool:
+	var inst := script.new() as TestCase
+	if inst == null:
+		push_error("Script '%s' do not inherits from TestCase" % script)
 
-func _test(inst: TestCase, script: Script, method_data: Dictionary) -> bool:
+	var local_runs: int = 0
+	var local_failures: int = 0
+	var local_results: Array[SutTestResult] = []
+	
+	SutTestReport.report_running(script.resource_path)
+	for method_data: Dictionary in inst.get_test_methods():
+		local_runs += 1
+		var result := _test(inst, script, method_data)
+		local_results.append(result)
+		results.append(result)
+		
+		if SutTestReport.report_result_if_failed(result):
+			local_failures += 1
+
+	runs += local_runs
+	failures += local_failures
+
+	if local_failures == 0:
+		SutTestReport.report("[color=%s]Tests run: %d[/color], Failures: %d, Time elapsed: %.3fs [color=%s]-- in %s[/color]" % [
+			SutTestOptions.get_singleton().success_color,
+			local_runs,
+			local_failures,
+			0.0,
+			SutTestOptions.get_singleton().dim_color,
+			"get_script_classname(script)",
+		])
+	else:
+		SutTestReport.report("Tests run: %d, [color=%s]Failures: %d[/color], Time elapsed: %.3fs [color=%s]-- in %s[/color]" % [
+			local_runs,
+			SutTestOptions.get_singleton().error_color,
+			local_failures,
+			0.0,
+			SutTestOptions.get_singleton().dim_color,
+			"get_script_classname(script)",
+		])
+
+	return local_failures == 0
+
+
+func _test(inst: TestCase, script: Script, method_data: Dictionary) -> SutTestResult:
 	inst.before_each()
 
 	var start := Time.get_ticks_usec()
 
 	inst.call(method_data.name)
 
-	var result := TestResult.new()
-	result.classname = get_script_classname(script)
-	result.long_classname = script.resource_path.trim_prefix("res://").trim_suffix(".gd").replace("/", ".")
+	var result := SutTestResult.new()
+	result.by = script
+	#result.classname = get_script_classname(script)
+	#result.long_classname = script.resource_path.trim_prefix("res://").trim_suffix(".gd").replace("/", ".")
 	result.name = method_data.name
-	result.duration = (Time.get_ticks_usec() - start) / 1_000_000.0
+	result.duration_usec = (Time.get_ticks_usec() - start) / 1_000_000.0
 	result.failures = inst._test_case_failures.duplicate()
 	result.no_assertion = inst._test_case_assertion_count == 0
-	results.append(result)
-
-	var failed := inst._test_case_has_failed()
-	for message: String in inst._test_case_failures:
-		SutTestReport.report_fail("[%s.%s] %s" % [get_script_classname(script), method_data.name, message])
+	#results.append(result)
+#
+	#var failed := inst._test_case_has_failed()
+	#for message: String in inst._test_case_failures:
+	#	SutTestReport.report_fail("[%s.%s] %s" % [get_script_classname(script), method_data.name, message])
 
 	inst._test_case_clean_itself()
-	return failed
+	return result
 
 
-func get_script_classname(script: Script) -> StringName:
-	var classname: StringName = script.get_global_name()
-	if classname.is_empty():
-		classname = script.resource_path.get_file().get_basename().to_pascal_case()
-	return classname
-
-
-class TestResult:
-	var classname: StringName
-	var long_classname: StringName
-	var name: StringName
-	var duration: float
-	var failures: Array[String] = []
-	var no_assertion := false
+#func get_script_classname(script: Script) -> StringName:
+#	var classname: StringName = script.get_global_name()
+#	if classname.is_empty():
+#		classname = script.resource_path.get_file().get_basename().to_pascal_case()
+#	return classname

@@ -1,7 +1,7 @@
 extends RefCounted
 class_name JUnitReport
 
-static func build(results: Array[TestRunner.TestResult], suite_name := "core") -> String:
+static func build(results: Array[SutTestResult], suite_name := "core") -> String:
 	var failures := 0
 	var errors := 0
 	var total_time := 0.0
