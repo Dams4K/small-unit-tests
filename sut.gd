@@ -34,7 +34,7 @@ func _run_tests_cli_threaded() -> void:
 
 func _run_tests_cli() ->void:
 	var project_path := ProjectSettings.globalize_path("res://")
-	var run_script_path := ProjectSettings.globalize_path("res://addons/sut/run.gd")
+	var run_script_path := ProjectSettings.globalize_path("res://addons/sut/cli/run.gd")
 	var output: Array
 
 	var exit_code := OS.execute(
