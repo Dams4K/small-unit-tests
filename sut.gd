@@ -4,6 +4,10 @@ extends EditorPlugin
 var run_tests_button: Button
 var run_thread: Thread
 
+func project_path(rel_path: String) -> String:
+	var base = get_script().resource_path.get_base_dir()
+	return base.path_join(rel_path)
+
 func _enter_tree() -> void:
 	run_tests_button = Button.new()
 	run_tests_button.tooltip_text = "Run all tests"
@@ -24,8 +28,9 @@ func _run_tests_cli_threaded() -> void:
 	if run_thread != null and run_thread.is_started():
 		return
 	
+	run_tests_button.disabled = true
 	var base = get_script().resource_path.get_base_dir()
-	var run_script_path := ProjectSettings.globalize_path(base.path_join("cli/run.gd"))
+	var run_script_path := ProjectSettings.globalize_path(project_path("cli/run.gd"))
 	
 	run_thread = Thread.new()
 	var err = run_thread.start(_run_tests_cli.bind(run_script_path))
@@ -65,6 +70,7 @@ func _on_tests_finished(exit_code: int, output: Array) -> void:
 		print_rich(line)
 
 	print("Tests finished with exit code: %d" % exit_code)
+	run_tests_button.disabled = false
 
 
 func _get_editor_icon_color() -> Color:
@@ -81,7 +87,7 @@ func _notification(what: int) -> void:
 
 func _update_ui():
 	var scale := EditorInterface.get_editor_scale()
-	var tex := preload("res://addons/sut/icon.svg") as Texture2D
+	var tex := load(project_path("icon.svg")) as Texture2D
 	var img := tex.get_image()
 	img.resize(int(16 * scale), int(16 * scale), Image.INTERPOLATE_LANCZOS)
 	run_tests_button.icon = ImageTexture.create_from_image(img)
