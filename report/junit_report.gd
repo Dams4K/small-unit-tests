@@ -8,7 +8,7 @@ static func build(results: Array[SutTestResult], suite_name := "core") -> String
 	var cases := ""
 
 	for r in results:
-		total_time += r.duration
+		total_time += r.get_duration_seconds()
 		cases += '\t\t<testcase classname="%s" name="%s" time="%.4f"' % [_esc(r.long_classname.trim_prefix("%s.%s." % [TestRunner.TESTS_DIR, suite_name])), _esc(r.name), r.duration]
 
 		if not r.failures.is_empty():
