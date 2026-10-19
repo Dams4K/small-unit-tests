@@ -7,9 +7,9 @@ func _init() -> void:
 	TestReport.report("\n[b]Results:[/b]")
 	
 	if runner.failures == 0:
-		TestReport.report("[color=%s]Tests run: %d[/color], Failures: %d" % [TestReport.C_PASS, runner.runs, runner.failures])
+		TestReport.report("[color=%s]Tests run: %d, Failures: %d[/color]" % [SutTestOptions.get_singleton().success_color, runner.runs, runner.failures])
 	else:
-		TestReport.report("[color=%s]Tests run: %d, Failures: %d[/color]" % [TestReport.C_FAIL, runner.runs, runner.failures])
+		TestReport.report("[color=%s]Tests run: %d, Failures: %d[/color]" % [SutTestOptions.get_singleton().error_color, runner.runs, runner.failures])
 	
 	_write_junit(runner)
 	quit(1 if failed else 0)

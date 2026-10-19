@@ -4,25 +4,14 @@ extends EditorPlugin
 var run_tests_button: Button
 var run_thread: Thread
 
-var editor_theme: Theme
-
 func _enter_tree() -> void:
-	editor_theme = EditorInterface.get_editor_theme()
-
 	run_tests_button = Button.new()
-	#run_tests_button.icon = preload("res://addons/sut/icon.svg")
 	run_tests_button.tooltip_text = "Run all tests"
 	run_tests_button.pressed.connect(_run_tests_cli_threaded)
 	run_tests_button.theme_type_variation = &"RunBarButton"
 
-	var scale := EditorInterface.get_editor_scale()
-	var tex := preload("res://addons/sut/icon.svg") as Texture2D
-	var img := tex.get_image()
-	img.resize(int(16 * scale), int(16 * scale), Image.INTERPOLATE_LANCZOS)
-	run_tests_button.icon = ImageTexture.create_from_image(img)
-	run_tests_button.modulate = EditorInterface.get_editor_theme().get_color("success_color", "Editor")
-
 	add_control_to_container(EditorPlugin.CONTAINER_TOOLBAR, run_tests_button)
+	_update_ui()
 
 
 func _exit_tree() -> void:
@@ -50,7 +39,13 @@ func _run_tests_cli() ->void:
 
 	var exit_code := OS.execute(
 		OS.get_executable_path(),
-		["--headless", "--path", project_path, "-s", run_script_path, "--", "--bbcode"],
+		[
+			"--headless", "--path", project_path, "-s", run_script_path,
+			"--",
+			"--bbcode",
+			"--success_color=%s" % SutTestColor.success().to_html(false),
+			"--error_color=%s" % SutTestColor.error().to_html(false)
+		],
 		output,
 		true,
 		false
@@ -64,7 +59,6 @@ func _on_tests_finished(exit_code: int, output: Array) -> void:
 		run_thread.wait_to_finish()
 		run_thread = null
 
-
 	for line in output:
 		print_rich(line)
 
@@ -77,3 +71,16 @@ func _get_editor_icon_color() -> Color:
 	if img.is_compressed():
 		img.decompress()
 	return img.get_pixel(img.get_width() / 2, img.get_height() / 2)
+
+
+func _notification(what: int) -> void:
+	if what == EditorSettings.NOTIFICATION_EDITOR_SETTINGS_CHANGED:
+		_update_ui()
+
+func _update_ui():
+	var scale := EditorInterface.get_editor_scale()
+	var tex := preload("res://addons/sut/icon.svg") as Texture2D
+	var img := tex.get_image()
+	img.resize(int(16 * scale), int(16 * scale), Image.INTERPOLATE_LANCZOS)
+	run_tests_button.icon = ImageTexture.create_from_image(img)
+	run_tests_button.modulate = SutTestColor.success()

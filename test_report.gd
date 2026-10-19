@@ -17,6 +17,6 @@ static func report(text: String) -> void:
 
 static func report_fail(text: String) -> void:
 	if bbcode_mode:
-		print("[color=%s]%s[/color]" % [C_FAIL, text])
+		print("[color=%s]%s[/color]" % [SutTestOptions.get_singleton().error_color, text])
 	else:
-		print_rich("[color=%s]%s[/color]" % [C_FAIL, text])
+		print_rich("[color=%s]%s[/color]" % [SutTestOptions.get_singleton().error_color, text])
