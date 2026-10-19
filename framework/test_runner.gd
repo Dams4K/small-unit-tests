@@ -70,25 +70,7 @@ func run_script(script: Script) -> bool:
 
 	runs += local_runs
 	failures += local_failures
-
-	if local_failures == 0:
-		SutTestReport.report("[color=%s]Tests run: %d[/color], Failures: %d, Time elapsed: %.3fs [color=%s]-- in %s[/color]" % [
-			SutTestOptions.get_singleton().success_color,
-			local_runs,
-			local_failures,
-			0.0,
-			SutTestOptions.get_singleton().dim_color,
-			"get_script_classname(script)",
-		])
-	else:
-		SutTestReport.report("Tests run: %d, [color=%s]Failures: %d[/color], Time elapsed: %.3fs [color=%s]-- in %s[/color]" % [
-			local_runs,
-			SutTestOptions.get_singleton().error_color,
-			local_failures,
-			0.0,
-			SutTestOptions.get_singleton().dim_color,
-			"get_script_classname(script)",
-		])
+	SutTestReport.report_results(results)
 
 	return local_failures == 0
 
