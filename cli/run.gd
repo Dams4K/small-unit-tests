@@ -2,7 +2,7 @@ extends SceneTree
 
 func _init() -> void:
 	var runner := TestRunner.new()
-	var failed := runner.run_all()
+	var succeed := runner.run_all()
 	
 	SutTestReport.report("\n[b][u]Results:[/u][/b]")
 	
@@ -10,7 +10,7 @@ func _init() -> void:
 	report_func.call("[b]Tests run: %d, Failures: %d[/b]" % [runner.runs, runner.failures])
 	
 	_write_junit(runner)
-	quit(1 if failed else 0)
+	quit(0 if succeed else 1)
 
 
 func _write_junit(runner: TestRunner) -> void:

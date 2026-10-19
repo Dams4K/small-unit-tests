@@ -42,14 +42,14 @@ func _inherits_test_case(script: Script) -> bool:
 	return false
 
 
-## Return true if there is any failures
+## Return false if there is any failures
 func run_all() -> bool:
-	var has_failures := false
+	var no_failures := true
 	for script: Script in scripts:
-		var failed := run_script(script)
-		has_failures = has_failures or failed
+		var succeed := run_script(script)
+		no_failures = no_failures and succeed
 	
-	return has_failures
+	return no_failures
 
 func run_script(script: Script) -> bool:
 	var inst := script.new() as TestCase
