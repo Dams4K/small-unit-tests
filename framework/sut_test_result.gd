@@ -21,4 +21,4 @@ func get_classname() -> String:
 	return classname
 
 func get_long_classname() -> String:
-	return by.resource_path.trim_suffix(".gd").trim_prefix(TestRunner.TESTS_DIR)
+	return by.resource_path.trim_suffix(".gd").trim_prefix(SutTestOptions.get_singleton().get_dir())

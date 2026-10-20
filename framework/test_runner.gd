@@ -1,7 +1,6 @@
 extends RefCounted
 class_name TestRunner
 
-const TESTS_DIR := "tests"
 const TEST_FILE_PREFIX := "test_"
 const GD_SUFFIX := ".gd"
 
@@ -12,7 +11,7 @@ var failures: int = 0
 var runs: int = 0
 
 func _init() -> void:
-	_scan_dir("res://" + TESTS_DIR)
+	_scan_dir(SutTestOptions.get_singleton().get_dir())
 	SutTestReport.report("%d test files found.\n" % scripts.size())
 
 func _scan_dir(path: String) -> void:

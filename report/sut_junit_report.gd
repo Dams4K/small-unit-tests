@@ -1,5 +1,5 @@
 extends RefCounted
-class_name JUnitReport
+class_name SutJUnitReport
 
 static func build(results: Array[SutTestResult], suite_name := "core") -> String:
 	var failures := 0

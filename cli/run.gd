@@ -23,5 +23,5 @@ func _write_junit(runner: TestRunner) -> void:
 			if file == null:
 				push_error("Cannot write JUnit report: %s" % path)
 				return
-			file.store_string(JUnitReport.build(runner.results))
+			file.store_string(SutJUnitReport.build(runner.results))
 			print("Junit report wrote in '%s'" % path)

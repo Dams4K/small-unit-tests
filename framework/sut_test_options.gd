@@ -7,6 +7,7 @@ class_name SutTestOptions
 @export_storage var warning_error: String = "#e0c068"
 @export_storage var dim_color: String = "#8b8b8b"
 @export_storage var junit: String = ""
+@export_storage var dir: String = "res://tests"
 
 static var instance: SutTestOptions
 
@@ -60,3 +61,8 @@ class OptionValue:
 			object.set(name, value)
 		else:
 			push_warning("attribut '%s' not found in '%s'" % [name, object])
+
+func get_dir() -> String:
+	if not dir.begins_with("res://"):
+		return "res://" + dir
+	return dir

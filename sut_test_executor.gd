@@ -20,7 +20,7 @@ func execute(run_script_path: String) -> void:
 		"--",
 		"--bbcode",
 		"--success_color=%s" % SutTestColor.success().to_html(false),
-		"--error_color=%s" % SutTestColor.error().to_html(false)
+		"--error_color=%s" % SutTestColor.error().to_html(false),
 	]
 	
 	var info := OS.execute_with_pipe(OS.get_executable_path(), args)
