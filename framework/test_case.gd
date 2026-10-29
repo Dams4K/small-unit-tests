@@ -32,6 +32,14 @@ func assert_false(actual: bool, msg := "") -> void:
 	_new_assert_called()
 	if actual:
 		_test_case_failures.append("%s expected false, got '%s'" % [msg, actual])
+
+
+func assert_approx(actual: float, expected: float, message: String = "") -> void:
+	assert_true(is_equal_approx(actual, expected), "%s (expected %s, got %s)" % [message, expected, actual])
+
+
+func assert_near(actual: float, expected: float, message: String = "") -> void:
+	assert_true(absf(actual - expected) < 0.01, "%s (expected %s, got %s)" % [message, expected, actual])
 #endregion
 
 #region HELPERS
